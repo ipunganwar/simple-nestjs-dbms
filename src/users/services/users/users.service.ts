@@ -17,7 +17,11 @@ export class UsersService {
     return;
   }
 
-  fetchUserById(id?: number) {
-    return { id };
+  fetchUserById(id: number) {
+    if (id !== 1) {
+      return null;
+    } else {
+      return { id };
+    }
   }
 }

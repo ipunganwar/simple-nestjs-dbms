@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -35,7 +37,10 @@ export class UsersController {
 
   @Get(':id')
   getUserById(@Param('id', ParseIntPipe) id: number) {
-    this.userService.fetchUserById(id);
+    const user = this.userService.fetchUserById(id);
+    if (!user) {
+      throw new HttpException('user not found!', HttpStatus.BAD_REQUEST);
+    }
 
     return { id };
   }
