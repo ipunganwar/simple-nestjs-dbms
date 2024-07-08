@@ -1,12 +1,24 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 // import { Request, Response } from 'express';
 import { CreateUserDto } from 'src/users/dtos/CreateUser.dto';
+import { UsersService } from 'src/users/services/users/users.service';
 
 @Controller('users')
 export class UsersController {
+  constructor(private userService: UsersService) {}
+
   @Get()
   getUsers() {
-    return { username: 'Jhon doe', email: 'jhondoe@mail.com' };
+    return this.userService.fetchUsers();
   }
 
   // @Post()
@@ -15,14 +27,15 @@ export class UsersController {
   // }
 
   @Post('create')
+  @UsePipes(new ValidationPipe())
   createUser(@Body() body: CreateUserDto) {
-    console.log(body);
-    return {};
+    this.userService.createUser(body);
+    return;
   }
 
   @Get(':id')
-  getUserById(@Param('id') id: string) {
-    console.log(id);
+  getUserById(@Param('id', ParseIntPipe) id: number) {
+    this.userService.fetchUserById(id);
 
     return { id };
   }
