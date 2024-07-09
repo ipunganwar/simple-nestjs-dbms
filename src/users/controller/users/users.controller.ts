@@ -7,19 +7,23 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 // import { Request, Response } from 'express';
 import { CreateUserDto } from 'src/users/dtos/CreateUser.dto';
+import { AuthGuard } from 'src/users/guard/auth/auth.guard';
 import { ValidateCreateUserPipe } from 'src/users/pipe/validate-create-user/validate-create-user.pipe';
 import { UsersService } from 'src/users/services/users/users.service';
 
 @Controller('users')
+// @UseGuards(AuthGuard)
 export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get()
+  @UseGuards(AuthGuard)
   getUsers() {
     return this.userService.fetchUsers();
   }
