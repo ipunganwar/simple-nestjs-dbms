@@ -1,4 +1,19 @@
-import { Entity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
-export class User {}
+export class User {
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: number;
+
+  @Column({ unique: true })
+  username: string;
+
+  @Column()
+  password: string;
+
+  @Column()
+  createdAt: string;
+
+  @Column({ nullable: true })
+  authStrategy: string;
+}
