@@ -1,27 +1,57 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserType } from '../../../utils/types';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Profile } from 'src/entities/profile.entity';
+import { User } from 'src/entities/user.entity';
+import {
+  CreateUserParams,
+  CreateUserProfileParams,
+  UpdateUserParams,
+} from 'src/utils/types';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  private fakeUsers = [
-    { username: 'Jhon doe 1', email: 'jhondoe@mail1.com' },
-    { username: 'Jhon doe 2', email: 'jhondoe@mail2.com' },
-  ];
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Profile) private profileRespository: Repository<Profile>,
+  ) {}
 
-  fetchUsers() {
-    return this.fakeUsers;
+  findUsers() {
+    return this.userRepository.find();
   }
 
-  createUser(userDetails: CreateUserType) {
-    this.fakeUsers.push(userDetails);
-    return;
+  createUser(userDetails: CreateUserParams) {
+    const newUser = this.userRepository.create({
+      ...userDetails,
+      createdAt: String(new Date()),
+    });
+    return this.userRepository.save(newUser);
   }
 
-  fetchUserById(id: number) {
-    if (id !== 1) {
-      return null;
-    } else {
-      return { id };
+  updateUser(id: number, updateUserDetails: UpdateUserParams) {
+    return this.userRepository.update({ id }, { ...updateUserDetails });
+  }
+
+  deleteUser(id: number) {
+    return this.userRepository.delete(id);
+  }
+
+  async createUserProfile(
+    id: number,
+    createUserProfileDetails: CreateUserProfileParams,
+  ) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new HttpException(
+        'user not found. Cannot create Profile',
+        HttpStatus.BAD_REQUEST,
+      );
     }
+
+    const newProfile = this.profileRespository.create(createUserProfileDetails);
+    const savedProfile = await this.profileRespository.save(newProfile);
+
+    user.profile = savedProfile;
+    return this.userRepository.save(user);
   }
 }
